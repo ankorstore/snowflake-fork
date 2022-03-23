@@ -1,7 +1,9 @@
 import SnowflakeApp from "../components/SnowflakeApp";
 
-export default () => (
+const IndexPage = ({ levels, milestones }) => (
   <div>
-    <SnowflakeApp />
+    <SnowflakeApp levels={levels} />
   </div>
 );
+
+export default IndexPage;
