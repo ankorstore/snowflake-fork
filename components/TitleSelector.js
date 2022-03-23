@@ -1,19 +1,21 @@
 // @flow
-
-import React from 'react'
-import { eligibleTitles } from '../constants'
-import type { MilestoneMap } from '../constants'
+import React from "react";
+import { eligibleTitles } from "../constants";
+import type { MilestoneMap } from "../constants";
 
 type Props = {
   milestoneByTrack: MilestoneMap,
   currentTitle: string,
-  setTitleFn: (string) => void
-}
+  setTitleFn: (string) => void,
+};
 
-class TitleSelector extends React.Component<Props> {
-  render() {
-    const titles = eligibleTitles(this.props.milestoneByTrack)
-    return <select value={this.props.currentTitle} onChange={e => this.props.setTitleFn(e.target.value)}>
+const TitleSelector = (props: Props) => {
+  const titles = eligibleTitles(props.milestoneByTrack);
+  return (
+    <select
+      value={props.currentTitle}
+      onChange={(e) => props.setTitleFn(e.target.value)}
+    >
       <style jsx>{`
         select {
           font-size: 20px;
@@ -22,13 +24,11 @@ class TitleSelector extends React.Component<Props> {
           min-width: 300px;
         }
       `}</style>
-      {titles.map(title => (
-        <option key={title}>
-          {title}
-        </option>
+      {titles.map((title) => (
+        <option key={title}>{title}</option>
       ))}
     </select>
-  }
-}
+  );
+};
 
-export default TitleSelector
+export default TitleSelector;
