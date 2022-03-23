@@ -14,7 +14,7 @@ import {
 } from "../constants";
 import PointSummaries from "../components/PointSummaries";
 import type { Milestone, MilestoneMap, TrackId } from "../constants";
-import React from "react";
+import React, { useState, useEffect } from "react";
 import TitleSelector from "../components/TitleSelector";
 
 type SnowflakeAppState = {
@@ -119,188 +119,181 @@ const stateToHash = (state: SnowflakeAppState) => {
 
 type Props = {};
 
-class SnowflakeApp extends React.Component<Props, SnowflakeAppState> {
-  constructor(props: Props) {
-    super(props);
-    this.state = emptyState();
-  }
+const SnowflakeApp = (props: Props) => {
+  const [state, setState] = useState(emptyState());
 
-  componentDidUpdate() {
-    const hash = stateToHash(this.state);
-    if (hash) window.location.replace(`#${hash}`);
-  }
-
-  componentDidMount() {
+  useEffect(() => {
     const state = hashToState(window.location.hash);
+
     if (state) {
-      this.setState(state);
+      setState(state);
     } else {
-      this.setState(defaultState());
+      setState(defaultState());
     }
-  }
+  }, []);
 
-  render() {
-    return (
-      <main>
-        <style jsx global>{`
-          body {
-            font-family: Helvetica;
-          }
-          main {
-            width: 960px;
-            margin: 0 auto;
-          }
-          .name-input {
-            border: none;
-            display: block;
-            border-bottom: 2px solid #fff;
-            font-size: 30px;
-            line-height: 40px;
-            font-weight: bold;
-            width: 380px;
-            margin-bottom: 10px;
-          }
-          .name-input:hover,
-          .name-input:focus {
-            border-bottom: 2px solid #ccc;
-            outline: 0;
-          }
-          a {
-            color: #888;
-            text-decoration: none;
-          }
-        `}</style>
-        <div style={{ margin: "19px auto 0", width: 142 }}>
-          <Logo />
-        </div>
-        <div style={{ display: "flex" }}>
-          <div style={{ flex: 1 }}>
-            <form>
-              <input
-                type="text"
-                className="name-input"
-                value={this.state.name}
-                onChange={(e) => this.setState({ name: e.target.value })}
-                placeholder="Name"
-              />
-              <TitleSelector
-                milestoneByTrack={this.state.milestoneByTrack}
-                currentTitle={this.state.title}
-                setTitleFn={(title) => this.setTitle(title)}
-              />
-            </form>
-            <PointSummaries milestoneByTrack={this.state.milestoneByTrack} />
-            <LevelThermometer milestoneByTrack={this.state.milestoneByTrack} />
-          </div>
-          <div style={{ flex: 0 }}>
-            <NightingaleChart
-              milestoneByTrack={this.state.milestoneByTrack}
-              focusedTrackId={this.state.focusedTrackId}
-              handleTrackMilestoneChangeFn={(track, milestone) =>
-                this.handleTrackMilestoneChange(track, milestone)
-              }
-            />
-          </div>
-        </div>
-        <TrackSelector
-          milestoneByTrack={this.state.milestoneByTrack}
-          focusedTrackId={this.state.focusedTrackId}
-          setFocusedTrackIdFn={this.setFocusedTrackId.bind(this)}
-        />
-        <KeyboardListener
-          selectNextTrackFn={this.shiftFocusedTrack.bind(this, 1)}
-          selectPrevTrackFn={this.shiftFocusedTrack.bind(this, -1)}
-          increaseFocusedMilestoneFn={this.shiftFocusedTrackMilestoneByDelta.bind(
-            this,
-            1
-          )}
-          decreaseFocusedMilestoneFn={this.shiftFocusedTrackMilestoneByDelta.bind(
-            this,
-            -1
-          )}
-        />
-        <Track
-          milestoneByTrack={this.state.milestoneByTrack}
-          trackId={this.state.focusedTrackId}
-          handleTrackMilestoneChangeFn={(track, milestone) =>
-            this.handleTrackMilestoneChange(track, milestone)
-          }
-        />
-        <div style={{ display: "flex", paddingBottom: "20px" }}>
-          <div style={{ flex: 1 }}>
-            Made with ❤️ by{" "}
-            <a href="https://medium.engineering" target="_blank">
-              Medium Eng
-            </a>
-            . Learn about the{" "}
-            <a
-              href="https://medium.com/s/engineering-growth-framework"
-              target="_blank"
-            >
-              this version of our growth framework
-            </a>{" "}
-            and{" "}
-            <a
-              href="https://medium.engineering/engineering-growth-at-medium-4935b3234d25"
-              target="_blank"
-            >
-              what we do currently
-            </a>
-            . Get the{" "}
-            <a href="https://github.com/Medium/snowflake" target="_blank">
-              source code
-            </a>
-            . Read the{" "}
-            <a href="https://medium.com/p/85e078bc15b7" target="_blank">
-              terms of service
-            </a>
-            .
-          </div>
-        </div>
-      </main>
-    );
-  }
+  useEffect(() => {
+    const hash = stateToHash(state);
+    if (hash) window.location.replace(`#${hash}`);
+  }, [state]);
 
-  handleTrackMilestoneChange(trackId: TrackId, milestone: Milestone) {
-    const milestoneByTrack = this.state.milestoneByTrack;
+  const handleTrackMilestoneChange = (
+    trackId: TrackId,
+    milestone: Milestone
+  ) => {
+    const milestoneByTrack = state.milestoneByTrack;
     milestoneByTrack[trackId] = milestone;
 
     const titles = eligibleTitles(milestoneByTrack);
-    const title =
-      titles.indexOf(this.state.title) === -1 ? titles[0] : this.state.title;
+    const title = titles.indexOf(state.title) === -1 ? titles[0] : state.title;
 
-    this.setState({ milestoneByTrack, focusedTrackId: trackId, title });
-  }
+    setState({ ...state, milestoneByTrack, focusedTrackId: trackId, title });
+  };
 
-  shiftFocusedTrack(delta: number) {
-    let index = trackIds.indexOf(this.state.focusedTrackId);
+  const shiftFocusedTrack = (delta: number) => {
+    let index = trackIds.indexOf(state.focusedTrackId);
     index = (index + delta + trackIds.length) % trackIds.length;
     const focusedTrackId = trackIds[index];
-    this.setState({ focusedTrackId });
-  }
+    setState({ ...state, focusedTrackId });
+  };
 
-  setFocusedTrackId(trackId: TrackId) {
+  const setFocusedTrackId = (trackId: TrackId) => {
     let index = trackIds.indexOf(trackId);
     const focusedTrackId = trackIds[index];
-    this.setState({ focusedTrackId });
-  }
+    setState({ ...state, focusedTrackId });
+  };
 
-  shiftFocusedTrackMilestoneByDelta(delta: number) {
-    let prevMilestone = this.state.milestoneByTrack[this.state.focusedTrackId];
+  const shiftFocusedTrackMilestoneByDelta = (delta: number) => {
+    let prevMilestone = state.milestoneByTrack[state.focusedTrackId];
     let milestone = prevMilestone + delta;
     if (milestone < 0) milestone = 0;
     if (milestone > 5) milestone = 5;
-    this.handleTrackMilestoneChange(
-      this.state.focusedTrackId,
+
+    handleTrackMilestoneChange(
+      state.focusedTrackId,
       ((milestone: any): Milestone)
     );
-  }
+  };
 
-  setTitle(title: string) {
-    let titles = eligibleTitles(this.state.milestoneByTrack);
+  const setTitle = (title: string) => {
+    let titles = eligibleTitles(state.milestoneByTrack);
     title = titles.indexOf(title) == -1 ? titles[0] : title;
-    this.setState({ title });
-  }
-}
+    setState({ ...state, title });
+  };
+
+  return (
+    <main>
+      <style jsx global>{`
+        body {
+          font-family: Helvetica;
+        }
+        main {
+          width: 960px;
+          margin: 0 auto;
+        }
+        .name-input {
+          border: none;
+          display: block;
+          border-bottom: 2px solid #fff;
+          font-size: 30px;
+          line-height: 40px;
+          font-weight: bold;
+          width: 380px;
+          margin-bottom: 10px;
+        }
+        .name-input:hover,
+        .name-input:focus {
+          border-bottom: 2px solid #ccc;
+          outline: 0;
+        }
+        a {
+          color: #888;
+          text-decoration: none;
+        }
+      `}</style>
+      <div style={{ margin: "19px auto 0", width: 142 }}>
+        <Logo />
+      </div>
+      <div style={{ display: "flex" }}>
+        <div style={{ flex: 1 }}>
+          <form>
+            <input
+              type="text"
+              className="name-input"
+              value={state.name}
+              onChange={(e) => setState({ ...state, name: e.target.value })}
+              placeholder="Name"
+            />
+            <TitleSelector
+              milestoneByTrack={state.milestoneByTrack}
+              currentTitle={state.title}
+              setTitleFn={(title) => setTitle(title)}
+            />
+          </form>
+          <PointSummaries milestoneByTrack={state.milestoneByTrack} />
+          <LevelThermometer milestoneByTrack={state.milestoneByTrack} />
+        </div>
+        <div style={{ flex: 0 }}>
+          <NightingaleChart
+            milestoneByTrack={state.milestoneByTrack}
+            focusedTrackId={state.focusedTrackId}
+            handleTrackMilestoneChangeFn={(track, milestone) =>
+              handleTrackMilestoneChange(track, milestone)
+            }
+          />
+        </div>
+      </div>
+      <TrackSelector
+        milestoneByTrack={state.milestoneByTrack}
+        focusedTrackId={state.focusedTrackId}
+        setFocusedTrackIdFn={setFocusedTrackId.bind(this)}
+      />
+      <KeyboardListener
+        selectNextTrackFn={() => shiftFocusedTrack(1)}
+        selectPrevTrackFn={() => shiftFocusedTrack(-1)}
+        increaseFocusedMilestoneFn={() => shiftFocusedTrackMilestoneByDelta(1)}
+        decreaseFocusedMilestoneFn={() => shiftFocusedTrackMilestoneByDelta(-1)}
+      />
+      <Track
+        milestoneByTrack={state.milestoneByTrack}
+        trackId={state.focusedTrackId}
+        handleTrackMilestoneChangeFn={(track, milestone) =>
+          handleTrackMilestoneChange(track, milestone)
+        }
+      />
+      <div style={{ display: "flex", paddingBottom: "20px" }}>
+        <div style={{ flex: 1 }}>
+          Made with ❤️ by{" "}
+          <a href="https://medium.engineering" target="_blank">
+            Medium Eng
+          </a>
+          . Learn about the{" "}
+          <a
+            href="https://medium.com/s/engineering-growth-framework"
+            target="_blank"
+          >
+            this version of our growth framework
+          </a>{" "}
+          and{" "}
+          <a
+            href="https://medium.engineering/engineering-growth-at-medium-4935b3234d25"
+            target="_blank"
+          >
+            what we do currently
+          </a>
+          . Get the{" "}
+          <a href="https://github.com/Medium/snowflake" target="_blank">
+            source code
+          </a>
+          . Read the{" "}
+          <a href="https://medium.com/p/85e078bc15b7" target="_blank">
+            terms of service
+          </a>
+          .
+        </div>
+      </div>
+    </main>
+  );
+};
 
 export default SnowflakeApp;
