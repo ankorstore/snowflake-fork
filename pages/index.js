@@ -1,8 +1,11 @@
 import SnowflakeApp from "../components/SnowflakeApp";
+import { AppProvider } from "../context/AppContext";
 
 const IndexPage = ({ levels, milestones }) => (
   <div>
-    <SnowflakeApp levels={levels} />
+    <AppProvider>
+      <SnowflakeApp levels={levels} />
+    </AppProvider>
   </div>
 );
 
