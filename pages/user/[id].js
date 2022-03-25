@@ -1,11 +1,16 @@
+import { useContext } from "react";
 import SnowflakeApp from "../../components/SnowflakeApp";
 import AppContext from "../../context/AppContext";
-import { useContext } from "react";
+import RouteGuard from "../../guards/RouteGuard";
 
 const UserPage = () => {
   const { loading } = useContext(AppContext);
 
-  return <div>{loading ? "Loading..." : <SnowflakeApp />}</div>;
+  return (
+    <RouteGuard>
+      <div>{loading ? "Loading..." : <SnowflakeApp />}</div>
+    </RouteGuard>
+  );
 };
 
 export default UserPage;

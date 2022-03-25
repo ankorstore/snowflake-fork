@@ -13,9 +13,9 @@ export const AppProvider = ({ children }) => {
 
   const fetchData = async () => {
     // TODO: Only auth users can see this data
-    // if (!isUser) {
-    //   return;
-    // }
+    if (!isUser) {
+      return;
+    }
 
     setLoading(true);
     const sheetData = await getGoogleSheetData();
