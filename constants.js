@@ -3,11 +3,17 @@
 // TODO: remove once data is taken from Google Sheets
 export type TrackId = string;
 export type Milestone = 0 | 1 | 2 | 3 | 4 | 5;
-
 export type MilestoneMap = {
   [key: TrackId]: Milestone,
 };
 export const milestones = [0, 1, 2, 3, 4, 5];
+
+export const CATEGORIES = {
+  BUILDING: "Building",
+  EXECUTING: "Executing",
+  SUPPORTING: "Supporting",
+  STRENGTHENING: "Strengthening",
+};
 
 export const milestoneToPoints = (milestone: Milestone): number => {
   switch (milestone) {

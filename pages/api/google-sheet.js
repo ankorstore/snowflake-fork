@@ -1,6 +1,6 @@
 //@flow
 import { google } from "googleapis";
-
+import { CATEGORIES } from "../../constants";
 // TODO: Share type between server and client
 export type User = {
   userName: string,
@@ -9,13 +9,6 @@ export type User = {
   milestoneByTrack: {
     [trackName: string]: number,
   },
-};
-
-const CATEGORIES = {
-  BUILDING: "Building",
-  EXECUTING: "Executing",
-  SUPPORTING: "Supporting",
-  STRENGTHENING: "Strengthening",
 };
 
 const parseLevels = (levels) => {
