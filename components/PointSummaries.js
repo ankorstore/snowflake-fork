@@ -1,20 +1,21 @@
 // @flow
 
-import {
-  pointsToLevels,
-  milestoneToPoints,
-  trackIds,
-  totalPointsFromMilestoneMap,
-} from "../constants";
+import { pointsToLevels, totalPointsFromMilestoneMap } from "../constants";
 import type { MilestoneMap } from "../constants";
-import React from "react";
-
+import React, { useContext } from "react";
+import AppContext from "../context/AppContext";
 type Props = {
   milestoneByTrack: MilestoneMap,
 };
 
 const PointSummaries = (props: Props) => {
-  const totalPoints = totalPointsFromMilestoneMap(props.milestoneByTrack);
+  const { data } = useContext(AppContext);
+  const { trackIds } = data;
+
+  const totalPoints = totalPointsFromMilestoneMap(
+    props.milestoneByTrack,
+    trackIds
+  );
 
   let currentLevel, nextLevel;
 

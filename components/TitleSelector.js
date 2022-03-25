@@ -1,8 +1,8 @@
 // @flow
-import React from "react";
+import React, { useContext } from "react";
 import { eligibleTitles } from "../constants";
 import type { MilestoneMap } from "../constants";
-
+import AppContext from "../context/AppContext";
 type Props = {
   milestoneByTrack: MilestoneMap,
   currentTitle: string,
@@ -10,7 +10,10 @@ type Props = {
 };
 
 const TitleSelector = (props: Props) => {
-  const titles = eligibleTitles(props.milestoneByTrack);
+  const { data } = useContext(AppContext);
+  const { trackIds } = data;
+
+  const titles = eligibleTitles(props.milestoneByTrack, trackIds);
   return (
     <select
       value={props.currentTitle}

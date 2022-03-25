@@ -1,24 +1,26 @@
 // @flow
 
-import React, { useEffect } from "react";
+import React, { useContext } from "react";
 import * as d3 from "d3";
-import { trackIds, milestones, tracks, categoryColorScale } from "../constants";
-import type { TrackId, Milestone, MilestoneMap } from "../constants";
-
+import { milestones } from "../constants";
+import type { TrackId, MilestoneMap } from "../constants";
+import AppContext from "../context/AppContext";
 const width = 400;
-const arcMilestones = milestones.slice(1); // we'll draw the '0' milestone with a circle, not an arc.
-
+// we'll draw the '0' milestone with a circle, not an arc.
+const arcMilestones = milestones.slice(1);
 type Props = {
   milestoneByTrack: MilestoneMap,
   focusedTrackId: TrackId,
-  handleTrackMilestoneChangeFn: (TrackId, Milestone) => void,
+  handleTrackMilestoneChangeFn: (TrackId, Milestone: Milestone) => void,
 };
 
 const NightingaleChart = (props: Props) => {
+  const { data } = useContext(AppContext);
+  const { tracks, categoryColorScale, trackIds } = data;
   const currentMilestoneId = props.milestoneByTrack[props.focusedTrackId];
 
   // TODO: Remove or find way how to use it in the component
-  const colorScale = d3.scaleSequential(d3.interpolateWarm).domain([0, 5]);
+  // const colorScale = d3.scaleSequential(d3.interpolateWarm).domain([0, 5]);
 
   const radiusScale = d3
     .scaleBand()

@@ -1,22 +1,19 @@
 // @flow
-
 import TrackSelector from "../components/TrackSelector";
 import NightingaleChart from "../components/NightingaleChart";
 import KeyboardListener from "../components/KeyboardListener";
 import Track from "../components/Track";
-import Logo from "./Logo";
+import Logo from "../components/Logo";
 import LevelThermometer from "../components/LevelThermometer";
-import {
-  eligibleTitles,
-  trackIds,
-  milestones,
-  milestoneToPoints,
-} from "../constants";
+import { eligibleTitles } from "../constants";
 import PointSummaries from "../components/PointSummaries";
 import type { Milestone, MilestoneMap, TrackId } from "../constants";
-import React, { useState, useEffect } from "react";
+import React, { useState, useContext } from "react";
 import TitleSelector from "../components/TitleSelector";
-
+import type { User } from "../pages/user/[id].js";
+import { useRouter } from "next/router";
+import Link from "next/link";
+import AppContext from "../context/AppContext";
 type SnowflakeAppState = {
   milestoneByTrack: MilestoneMap,
   name: string,
@@ -24,130 +21,39 @@ type SnowflakeAppState = {
   focusedTrackId: TrackId,
 };
 
-const hashToState = (hash: String): ?SnowflakeAppState => {
-  if (!hash) return null;
-  const result = defaultState();
-  const hashValues = hash.split("#")[1].split(",");
-  if (!hashValues) return null;
-  trackIds.forEach((trackId, i) => {
-    result.milestoneByTrack[trackId] = coerceMilestone(Number(hashValues[i]));
-  });
-  if (hashValues[16]) result.name = decodeURI(hashValues[16]);
-  if (hashValues[17]) result.title = decodeURI(hashValues[17]);
-  return result;
-};
-
-const coerceMilestone = (value: number): Milestone => {
-  // HACK I know this is goofy but i'm dealing with flow typing
-  switch (value) {
-    case 0:
-      return 0;
-    case 1:
-      return 1;
-    case 2:
-      return 2;
-    case 3:
-      return 3;
-    case 4:
-      return 4;
-    case 5:
-      return 5;
-    default:
-      return 0;
-  }
-};
-
-const emptyState = (): SnowflakeAppState => {
+const defaultState = (userName, milestoneByTrack): SnowflakeAppState => {
   return {
-    name: "",
-    title: "",
-    milestoneByTrack: {
-      MOBILE: 0,
-      WEB_CLIENT: 0,
-      FOUNDATIONS: 0,
-      SERVERS: 0,
-      PROJECT_MANAGEMENT: 0,
-      COMMUNICATION: 0,
-      CRAFT: 0,
-      INITIATIVE: 0,
-      CAREER_DEVELOPMENT: 0,
-      ORG_DESIGN: 0,
-      WELLBEING: 0,
-      ACCOMPLISHMENT: 0,
-      MENTORSHIP: 0,
-      EVANGELISM: 0,
-      RECRUITING: 0,
-      COMMUNITY: 0,
-    },
-    focusedTrackId: "MOBILE",
-  };
-};
-
-const defaultState = (): SnowflakeAppState => {
-  return {
-    name: "Cersei Lannister",
+    name: userName,
     title: "Staff Engineer",
-    milestoneByTrack: {
-      MOBILE: 1,
-      WEB_CLIENT: 2,
-      FOUNDATIONS: 3,
-      SERVERS: 2,
-      PROJECT_MANAGEMENT: 4,
-      COMMUNICATION: 1,
-      CRAFT: 1,
-      INITIATIVE: 4,
-      CAREER_DEVELOPMENT: 3,
-      ORG_DESIGN: 2,
-      WELLBEING: 0,
-      ACCOMPLISHMENT: 4,
-      MENTORSHIP: 2,
-      EVANGELISM: 2,
-      RECRUITING: 3,
-      COMMUNITY: 0,
-    },
-    focusedTrackId: "MOBILE",
+    milestoneByTrack,
+    focusedTrackId: "Mobile",
   };
 };
 
-const stateToHash = (state: SnowflakeAppState) => {
-  if (!state || !state.milestoneByTrack) return null;
-  const values = trackIds
-    .map((trackId) => state.milestoneByTrack[trackId])
-    .concat(encodeURI(state.name), encodeURI(state.title));
-  return values.join(",");
-};
-
-type Props = {};
-
-const SnowflakeApp = (props: Props) => {
-  const [state, setState] = useState(emptyState());
-
-  useEffect(() => {
-    const state = hashToState(window.location.hash);
-
-    if (state) {
-      setState(state);
-    } else {
-      setState(defaultState());
-    }
-  }, []);
-
-  useEffect(() => {
-    const hash = stateToHash(state);
-    if (hash) window.location.replace(`#${hash}`);
-  }, [state]);
+const SnowflakeApp = () => {
+  const [state, setState] = useState(defaultState(userName, milestoneByTrack));
+  const router = useRouter();
+  const { data } = useContext(AppContext);
+  const { tracks, trackIds, users } = data;
+  const { id } = router.query;
+  const user = users[id];
+  const { userName, milestoneByTrack } = user;
 
   const handleTrackMilestoneChange = (
     trackId: TrackId,
     milestone: Milestone
   ) => {
-    const milestoneByTrack = state.milestoneByTrack;
     milestoneByTrack[trackId] = milestone;
 
-    const titles = eligibleTitles(milestoneByTrack);
+    const titles = eligibleTitles(milestoneByTrack, trackIds);
     const title = titles.indexOf(state.title) === -1 ? titles[0] : state.title;
 
-    setState({ ...state, milestoneByTrack, focusedTrackId: trackId, title });
+    setState({
+      ...state,
+      milestoneByTrack,
+      focusedTrackId: trackId,
+      title,
+    });
   };
 
   const shiftFocusedTrack = (delta: number) => {
@@ -164,7 +70,7 @@ const SnowflakeApp = (props: Props) => {
   };
 
   const shiftFocusedTrackMilestoneByDelta = (delta: number) => {
-    let prevMilestone = state.milestoneByTrack[state.focusedTrackId];
+    let prevMilestone = milestoneByTrack[state.focusedTrackId];
     let milestone = prevMilestone + delta;
     if (milestone < 0) milestone = 0;
     if (milestone > 5) milestone = 5;
@@ -176,7 +82,7 @@ const SnowflakeApp = (props: Props) => {
   };
 
   const setTitle = (title: string) => {
-    let titles = eligibleTitles(state.milestoneByTrack);
+    let titles = eligibleTitles(milestoneByTrack, trackIds);
     title = titles.indexOf(title) == -1 ? titles[0] : title;
     setState({ ...state, title });
   };
@@ -212,7 +118,11 @@ const SnowflakeApp = (props: Props) => {
         }
       `}</style>
       <div style={{ margin: "19px auto 0", width: 142 }}>
-        <Logo />
+        <Link href="/users">
+          <a>
+            <Logo />
+          </a>
+        </Link>
       </div>
       <div style={{ display: "flex" }}>
         <div style={{ flex: 1 }}>
@@ -220,22 +130,26 @@ const SnowflakeApp = (props: Props) => {
             <input
               type="text"
               className="name-input"
-              value={state.name}
+              value={userName}
+              // TODO: Is this the right way to do this?
               onChange={(e) => setState({ ...state, name: e.target.value })}
               placeholder="Name"
             />
             <TitleSelector
-              milestoneByTrack={state.milestoneByTrack}
+              milestoneByTrack={milestoneByTrack}
               currentTitle={state.title}
               setTitleFn={(title) => setTitle(title)}
             />
           </form>
-          <PointSummaries milestoneByTrack={state.milestoneByTrack} />
-          <LevelThermometer milestoneByTrack={state.milestoneByTrack} />
+          <PointSummaries milestoneByTrack={milestoneByTrack} />
+          <LevelThermometer
+            milestoneByTrack={milestoneByTrack}
+            tracks={tracks}
+          />
         </div>
         <div style={{ flex: 0 }}>
           <NightingaleChart
-            milestoneByTrack={state.milestoneByTrack}
+            milestoneByTrack={milestoneByTrack}
             focusedTrackId={state.focusedTrackId}
             handleTrackMilestoneChangeFn={(track, milestone) =>
               handleTrackMilestoneChange(track, milestone)
@@ -244,7 +158,7 @@ const SnowflakeApp = (props: Props) => {
         </div>
       </div>
       <TrackSelector
-        milestoneByTrack={state.milestoneByTrack}
+        milestoneByTrack={milestoneByTrack}
         focusedTrackId={state.focusedTrackId}
         setFocusedTrackIdFn={setFocusedTrackId.bind(this)}
       />
@@ -255,7 +169,7 @@ const SnowflakeApp = (props: Props) => {
         decreaseFocusedMilestoneFn={() => shiftFocusedTrackMilestoneByDelta(-1)}
       />
       <Track
-        milestoneByTrack={state.milestoneByTrack}
+        milestoneByTrack={milestoneByTrack}
         trackId={state.focusedTrackId}
         handleTrackMilestoneChangeFn={(track, milestone) =>
           handleTrackMilestoneChange(track, milestone)

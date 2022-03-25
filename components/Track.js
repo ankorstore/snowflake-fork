@@ -1,19 +1,23 @@
 // @flow
-
-import { tracks, milestones, categoryColorScale } from "../constants";
-import React from "react";
+import { milestones } from "../constants";
+import React, { useContext } from "react";
 import type { MilestoneMap, TrackId, Milestone } from "../constants";
+import AppContext from "../context/AppContext";
 
 type Props = {
   milestoneByTrack: MilestoneMap,
   trackId: TrackId,
-  handleTrackMilestoneChangeFn: (TrackId, Milestone) => void,
+  handleTrackMilestoneChangeFn: (TrackId, Milestone: Milestone) => void,
 };
 
 const Track = (props: Props) => {
+  const { data } = useContext(AppContext);
+  const { tracks, categoryColorScale } = data;
+
   const track = tracks[props.trackId];
   const currentMilestoneId = props.milestoneByTrack[props.trackId];
   const currentMilestone = track.milestones[currentMilestoneId - 1];
+
   return (
     <div className="track">
       <style jsx>{`

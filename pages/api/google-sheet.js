@@ -1,8 +1,19 @@
+//@flow
 import { google } from "googleapis";
 
-const categories = {
+// TODO: Share type between server and client
+export type User = {
+  userName: string,
+  level: string,
+  totalScore: number,
+  milestoneByTrack: {
+    [trackName: string]: number,
+  },
+};
+
+const CATEGORIES = {
   BUILDING: "Building",
-  EXECUTION: "Execution",
+  EXECUTING: "Executing",
   SUPPORTING: "Supporting",
   STRENGTHENING: "Strengthening",
 };
@@ -35,43 +46,76 @@ const parseMilestoneData = (milestoneData) => {
   }, {});
 };
 
-const parseTracks = (categoryNames, categoryTracks, trackDescriptions) => {
-  let categoryName = "";
+const parseTracks = (categories) => {
+  const tracks = {};
 
-  return categoryTracks.reduce((state, trackName, index) => {
-    const newCategoryName = categoryNames[index];
-    const trackDescription = trackDescriptions[index];
+  categories.forEach((category) => {
+    const [categoryName, categoryData] = category;
+    const [header, subHeader, ...milestonesScores] = categoryData;
 
-    if (trackName === "") {
-      // Empty string is sign of end of category
-      return state;
-    }
+    const trackNames = header.filter((trackName) => trackName !== "");
+    const trackDescriptions = subHeader.filter(
+      (trackDescription) => trackDescription !== ""
+    );
 
-    if (newCategoryName !== "") {
-      // Save a new category name
-      categoryName = newCategoryName;
-    }
+    trackNames.forEach((trackName, index) => {
+      tracks[trackName] = {
+        category: categoryName,
+        displayName: trackName,
+        trackDescription: trackDescriptions[index],
+        milestones: [],
+      };
+    });
 
-    state[trackName] = {
-      displayName: trackName,
-      category: categoryName,
-      description: trackDescription,
-      milestones: {
-        // TODO: Get milestones from Google Sheets
-      },
-    };
+    milestonesScores.forEach((milestone, milestoneIndex, array) => {
+      if (milestoneIndex % 5 === 0) {
+        const [score, ...summaries] = milestone;
 
-    return state;
-  }, {});
+        const examples1 = array[milestoneIndex + 2];
+        const examples2 = array[milestoneIndex + 3];
+        const examples3 = array[milestoneIndex + 4];
+
+        summaries.forEach((summary, summaryIndex) => {
+          if (summaryIndex % 3 === 0) {
+            const trackName = trackNames[summaryIndex / 3];
+            const exampleIndex = summaryIndex + 1;
+            const signalIndex = summaryIndex + 2;
+
+            tracks[trackName].milestones.push({
+              score,
+              summary,
+              examples: [
+                examples1[exampleIndex],
+                examples2[exampleIndex],
+                examples3[exampleIndex],
+              ],
+              signals: [
+                examples1[signalIndex],
+                examples2[signalIndex],
+                examples3[signalIndex],
+              ],
+            });
+          }
+        });
+      }
+    });
+  });
+
+  return tracks;
 };
 
-const parseUsers = (usersData, categoryTracks) => {
+const parseUsers = (
+  usersData,
+  categoryTracks
+): {
+  [userName: string]: User,
+} => {
   return usersData.reduce((userState, data) => {
     const [userName, level, totalScore, ...userScores] = data;
-    const scores = userScores.reduce((scoreState, score, index) => {
+    const milestoneByTrack = userScores.reduce((scoreState, score, index) => {
       if (score !== "") {
         const trackName = categoryTracks[index];
-        scoreState[trackName] = score;
+        scoreState[trackName] = parseInt(score, 10);
       }
 
       return scoreState;
@@ -80,8 +124,8 @@ const parseUsers = (usersData, categoryTracks) => {
     userState[userName] = {
       userName,
       level,
-      totalScore,
-      scores,
+      totalScore: parseInt(totalScore, 10),
+      milestoneByTrack,
     };
 
     return userState;
@@ -101,28 +145,53 @@ export default async function handler(req, res) {
   const levelRange = `Notes!G10:I`;
   const milestoneRange = `Notes!B10:D`;
 
+  // Range of categories sheets
+  const buildingMilestonesRange = `Building!B8:P`;
+  const executionMilestonesRange = `Executing!B8:P`;
+  const supportingMilestonesRange = `Supporting!B8:P`;
+  const strengtheningMilestonesRange = `Strengthening!B8:P`;
+
   const response = await sheets.spreadsheets.values.batchGet({
     spreadsheetId: process.env.SHEET_ID,
-    ranges: [userProgressionRange, categoryRange, levelRange, milestoneRange],
+    ranges: [
+      userProgressionRange,
+      categoryRange,
+      levelRange,
+      milestoneRange,
+      buildingMilestonesRange,
+      executionMilestonesRange,
+      supportingMilestonesRange,
+      strengtheningMilestonesRange,
+    ],
     majorDimension: "ROWS",
   });
 
-  const [userProgression, category, levelsData, milestoneData] =
-    response.data.valueRanges;
+  const [
+    userProgressionData,
+    categoryData,
+    levelsData,
+    milestoneData,
+    buildingMilestonesData,
+    executionMilestonesData,
+    supportingMilestonesData,
+    strengtheningMilestonesData,
+  ] = response.data.valueRanges;
 
   /**
    * Generate tracks from the category sheet
    */
-  const categoryNames = category.values[0];
-  const categoryTracks = category.values[1];
-  const trackDescriptions = category.values[2];
-
-  const tracks = parseTracks(categoryNames, categoryTracks, trackDescriptions);
+  const tracks = parseTracks([
+    [CATEGORIES.BUILDING, buildingMilestonesData.values],
+    [CATEGORIES.EXECUTING, executionMilestonesData.values],
+    [CATEGORIES.SUPPORTING, supportingMilestonesData.values],
+    [CATEGORIES.STRENGTHENING, strengtheningMilestonesData.values],
+  ]);
 
   /**
    * Users score
    */
-  const users = parseUsers(userProgression.values, categoryTracks);
+  const categoryTracks = categoryData.values[1];
+  const users = parseUsers(userProgressionData.values, categoryTracks);
 
   /**
    * Levels
@@ -134,10 +203,7 @@ export default async function handler(req, res) {
    */
   const milestones = parseMilestoneData(milestoneData.values);
 
-  res.status(200).json({
-    users: JSON.parse(JSON.stringify(users)),
-    tracks: JSON.parse(JSON.stringify(tracks)),
-    levels: JSON.parse(JSON.stringify(levels)),
-    milestones,
-  });
+  res
+    .status(200)
+    .json(JSON.parse(JSON.stringify({ tracks, users, levels, milestones })));
 }

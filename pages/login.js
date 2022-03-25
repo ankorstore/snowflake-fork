@@ -1,4 +1,5 @@
 import { useSession, signIn, signOut } from "next-auth/react";
+import Link from "next/link";
 
 const Button = (props) => {
   return (
@@ -24,6 +25,7 @@ export default function Component() {
       <>
         Signed in as {session.user.email} <br />
         <Button onClick={() => signOut()}>Sign out</Button>
+        <Link href="/users">See all users</Link>
       </>
     );
   }
