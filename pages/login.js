@@ -1,34 +1,25 @@
-import { useSession, signIn, signOut } from "next-auth/react";
+import { useSession, signIn } from "next-auth/react";
 import Link from "next/link";
-
-const Button = (props) => {
-  return (
-    <>
-      <style jsx>{`
-        button {
-          padding: 10px 16px;
-          border-radius: 2px;
-          border: 1px solid black;
-          background: transparent;
-        }
-      `}</style>
-      <button {...props} />
-    </>
-  );
-};
+import { useRouter } from "next/router";
+import { useEffect } from "react";
+import Button from "../components/Button";
 
 export default function Component() {
   const { data: session } = useSession();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (session) {
+      router.push("/users");
+    }
+
+    return () => {};
+  }, [session]);
 
   if (session) {
-    return (
-      <>
-        Signed in as {session.user.email} <br />
-        <Button onClick={() => signOut()}>Sign out</Button>
-        <Link href="/users">See all users</Link>
-      </>
-    );
+    return "Loading...";
   }
+
   return (
     <>
       Not signed in <br />

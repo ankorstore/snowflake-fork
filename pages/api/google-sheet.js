@@ -139,7 +139,7 @@ export default async function handler(req, res) {
   const milestoneRange = `Notes!B10:D`;
 
   // Range of categories sheets
-  const buildingMilestonesRange = `Building!B8:P`;
+  const buildingMilestonesRange = `Building!B8:V`;
   const executionMilestonesRange = `Executing!B8:P`;
   const supportingMilestonesRange = `Supporting!B8:P`;
   const strengtheningMilestonesRange = `Strengthening!B8:P`;
