@@ -11,7 +11,7 @@ const RouteGuard = ({ children }) => {
     if (session) {
       setLoading(false);
     } else {
-      router.push("/login");
+      router.push("/");
     }
   }, [session]);
 

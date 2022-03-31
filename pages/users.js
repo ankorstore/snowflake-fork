@@ -5,7 +5,7 @@ import RouteGuard from "../guards/RouteGuard";
 import Profile from "../components/Profile";
 import Autosuggest from "react-autosuggest";
 
-const UsersPage = ({ levels, milestones }) => {
+const UsersPage = () => {
   const { data, loading } = useContext(AppContext);
   const [users, setUsers] = useState([]);
   const [inputValue, setInputValue] = useState("");

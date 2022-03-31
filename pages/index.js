@@ -12,8 +12,6 @@ export default function Component() {
     if (session) {
       router.push("/users");
     }
-
-    return () => {};
   }, [session]);
 
   if (session) {
