@@ -126,77 +126,82 @@ const parseUsers = (
 };
 
 export default async function handler(req, res) {
-  const auth = await google.auth.getClient({
-    scopes: ["https://www.googleapis.com/auth/spreadsheets.readonly"],
-  });
+  try {
+    const auth = await google.auth.getClient({
+      scopes: ["https://www.googleapis.com/auth/spreadsheets.readonly"],
+    });
 
-  const sheets = google.sheets({ version: "v4", auth });
+    const sheets = google.sheets({ version: "v4", auth });
 
-  // Ranges of the sheet to read
-  const userProgressionRange = `Progression!A4:V`;
-  const categoryRange = `Progression!D1:V3`;
-  const levelRange = `Notes!G10:I`;
-  const milestoneRange = `Notes!B10:D`;
+    // Ranges of the sheet to read
+    const userProgressionRange = `Progression!A4:V`;
+    const categoryRange = `Progression!D1:V3`;
+    const levelRange = `Notes!G10:I`;
+    const milestoneRange = `Notes!B10:D`;
 
-  // Range of categories sheets
-  const buildingMilestonesRange = `Building!B8:V`;
-  const executionMilestonesRange = `Executing!B8:P`;
-  const supportingMilestonesRange = `Supporting!B8:P`;
-  const strengtheningMilestonesRange = `Strengthening!B8:P`;
+    // Range of categories sheets
+    const buildingMilestonesRange = `Building!B8:V`;
+    const executionMilestonesRange = `Executing!B8:P`;
+    const supportingMilestonesRange = `Supporting!B8:P`;
+    const strengtheningMilestonesRange = `Strengthening!B8:P`;
 
-  const response = await sheets.spreadsheets.values.batchGet({
-    spreadsheetId: process.env.SHEET_ID,
-    ranges: [
-      userProgressionRange,
-      categoryRange,
-      levelRange,
-      milestoneRange,
-      buildingMilestonesRange,
-      executionMilestonesRange,
-      supportingMilestonesRange,
-      strengtheningMilestonesRange,
-    ],
-    majorDimension: "ROWS",
-  });
+    const response = await sheets.spreadsheets.values.batchGet({
+      spreadsheetId: process.env.SHEET_ID,
+      ranges: [
+        userProgressionRange,
+        categoryRange,
+        levelRange,
+        milestoneRange,
+        buildingMilestonesRange,
+        executionMilestonesRange,
+        supportingMilestonesRange,
+        strengtheningMilestonesRange,
+      ],
+      majorDimension: "ROWS",
+    });
 
-  const [
-    userProgressionData,
-    categoryData,
-    levelsData,
-    milestoneData,
-    buildingMilestonesData,
-    executionMilestonesData,
-    supportingMilestonesData,
-    strengtheningMilestonesData,
-  ] = response.data.valueRanges;
+    const [
+      userProgressionData,
+      categoryData,
+      levelsData,
+      milestoneData,
+      buildingMilestonesData,
+      executionMilestonesData,
+      supportingMilestonesData,
+      strengtheningMilestonesData,
+    ] = response.data.valueRanges;
 
-  /**
-   * Generate tracks from the category sheet
-   */
-  const tracks = parseTracks([
-    [CATEGORIES.BUILDING, buildingMilestonesData.values],
-    [CATEGORIES.EXECUTING, executionMilestonesData.values],
-    [CATEGORIES.SUPPORTING, supportingMilestonesData.values],
-    [CATEGORIES.STRENGTHENING, strengtheningMilestonesData.values],
-  ]);
+    /**
+     * Generate tracks from the category sheet
+     */
+    const tracks = parseTracks([
+      [CATEGORIES.BUILDING, buildingMilestonesData.values],
+      [CATEGORIES.EXECUTING, executionMilestonesData.values],
+      [CATEGORIES.SUPPORTING, supportingMilestonesData.values],
+      [CATEGORIES.STRENGTHENING, strengtheningMilestonesData.values],
+    ]);
 
-  /**
-   * Users score
-   */
-  const categoryTracks = categoryData.values[1];
-  const users = parseUsers(userProgressionData.values, categoryTracks);
+    /**
+     * Users score
+     */
+    const categoryTracks = categoryData.values[1];
+    const users = parseUsers(userProgressionData.values, categoryTracks);
 
-  /**
-   * Levels
-   */
-  const levels = parseLevels(levelsData.values);
+    /**
+     * Levels
+     */
+    const levels = parseLevels(levelsData.values);
 
-  /**
-   * Milestones points
-   */
-  const milestones = parseMilestoneData(milestoneData.values);
+    /**
+     * Milestones points
+     */
+    const milestones = parseMilestoneData(milestoneData.values);
 
-  res
-    .status(200)
-    .json(JSON.parse(JSON.stringify({ tracks, users, levels, milestones })));
+    res
+      .status(200)
+      .json(JSON.parse(JSON.stringify({ tracks, users, levels, milestones })));
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ error: error.message });
+  }
 }
