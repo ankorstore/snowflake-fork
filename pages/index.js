@@ -1,8 +1,6 @@
-import { useSession, signIn } from "next-auth/react";
-import Link from "next/link";
+import { useSession } from "next-auth/react";
 import { useRouter } from "next/router";
 import { useEffect } from "react";
-import Button from "../components/Button";
 
 export default function Component() {
   const { data: session } = useSession();
@@ -18,10 +16,5 @@ export default function Component() {
     return "Loading...";
   }
 
-  return (
-    <>
-      Not signed in <br />
-      <Button onClick={() => signIn()}>Sign in</Button>
-    </>
-  );
+  return <h1 className="text-center">Please, signed in to use the app</h1>;
 }

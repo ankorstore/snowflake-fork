@@ -1,17 +1,8 @@
-const Button = (props) => {
-  return (
-    <>
-      <style jsx>{`
-        button {
-          padding: 10px 16px;
-          border-radius: 2px;
-          border: 1px solid black;
-          background: transparent;
-        }
-      `}</style>
-      <button {...props} />
-    </>
-  );
-};
+const Button = ({ className = "", ...props }) => (
+  <button
+    className={`${className} bg-black rounded-default text-white text-[14px] h-[34px] w-[160px] leading-normal`}
+    {...props}
+  />
+);
 
 export default Button;
