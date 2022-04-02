@@ -6,7 +6,7 @@ const Profile = () => {
   return (
     <div>
       Signed in as {session.user.email} <br />
-      <Button onClick={() => signOut()}>Sign out</Button>
+      <Button onClick={signOut}>Sign out</Button>
     </div>
   );
 };

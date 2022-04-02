@@ -7,6 +7,7 @@ on:
       - main
 
 env:
+  # project-id
   CLOUD_RUN_PROJECT_ID: ${{ secrets.CLOUD_RUN_PROJECT_NAME }}
   CLOUD_RUN_REGION: europe-west1
   # project-name but it can be anything you want

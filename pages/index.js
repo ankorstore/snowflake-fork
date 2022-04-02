@@ -1,20 +1,24 @@
-import { useSession } from "next-auth/react";
+import { useSession, signIn } from "next-auth/react";
 import { useRouter } from "next/router";
 import { useEffect } from "react";
 
-export default function Component() {
-  const { data: session } = useSession();
+const IndexPage = () => {
+  const { data: session, status } = useSession();
   const router = useRouter();
 
   useEffect(() => {
-    if (session) {
+    if (status === "unauthenticated") {
+      signIn();
+    } else if (status === "authenticated") {
       router.push("/users");
     }
-  }, [session]);
+  }, [status]);
 
-  if (session) {
+  if (status === "loading") {
     return "Loading...";
   }
 
-  return <h1 className="text-center">Please, signed in to use the app</h1>;
-}
+  return null;
+};
+
+export default IndexPage;
