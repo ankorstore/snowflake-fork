@@ -1,0 +1,40 @@
+.container {
+  display: flex;
+  position: relative;
+  width: 282px;
+  height: 100%;
+  padding: 1px 16px 1px 4px;
+}
+
+.input {
+  width: 100%;
+  height: 100%;
+  font-size: 0.875rem;
+  border: none;
+  outline: 0;
+  padding: 0;
+  background: white;
+  padding-right: 1rem;
+}
+
+.inputOpen {
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+}
+
+.inputFocused {
+  outline: none;
+}
+
+.suggestionsContainer {
+  position: absolute;
+  top: 3rem;
+  left: 0;
+}
+
+.suggestion {
+  /* border: 1px solid yellow; */
+}
+.suggestionHighlighted {
+  /* border: 1px solid grey; */
+}

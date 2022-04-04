@@ -10,7 +10,8 @@ const IndexPage = () => {
     if (status === "unauthenticated") {
       signIn();
     } else if (status === "authenticated") {
-      router.push("/users");
+      const userId = session.user.name;
+      router.push(`/user/${userId}`);
     }
   }, [status]);
 

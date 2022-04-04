@@ -30,13 +30,17 @@ const defaultState = (userName, milestoneByTrack): SnowflakeAppState => {
   };
 };
 
+const getFirstUser = (users): User => {
+  return users[Object.keys(users)[0]];
+};
+
 const SnowflakeApp = () => {
   const [state, setState] = useState(defaultState(userName, milestoneByTrack));
   const router = useRouter();
   const { data } = useContext(AppContext);
   const { tracks, trackIds, users } = data;
   const { id } = router.query;
-  const user = users[id];
+  const user = users[id] || getFirstUser(users);
   const { userName, milestoneByTrack } = user;
 
   const handleTrackMilestoneChange = (
@@ -94,7 +98,6 @@ const SnowflakeApp = () => {
           font-family: Helvetica;
         }
         main {
-          width: 960px;
           margin: 0 auto;
         }
         .name-input {
@@ -112,18 +115,7 @@ const SnowflakeApp = () => {
           border-bottom: 2px solid #ccc;
           outline: 0;
         }
-        a {
-          color: #888;
-          text-decoration: none;
-        }
       `}</style>
-      <div style={{ margin: "19px auto 0", width: 142 }}>
-        <Link href="/users">
-          <a>
-            <Logo />
-          </a>
-        </Link>
-      </div>
       <div style={{ display: "flex" }}>
         <div style={{ flex: 1 }}>
           <form>
