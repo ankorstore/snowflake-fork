@@ -14,6 +14,7 @@ import type { User } from "../pages/user/[id].js";
 import { useRouter } from "next/router";
 import Link from "next/link";
 import AppContext from "../context/AppContext";
+import Autosuggest from "../components/Autosuggest";
 type SnowflakeAppState = {
   milestoneByTrack: MilestoneMap,
   name: string,
@@ -100,33 +101,11 @@ const SnowflakeApp = () => {
         main {
           margin: 0 auto;
         }
-        .name-input {
-          border: none;
-          display: block;
-          border-bottom: 2px solid #fff;
-          font-size: 30px;
-          line-height: 40px;
-          font-weight: bold;
-          width: 380px;
-          margin-bottom: 10px;
-        }
-        .name-input:hover,
-        .name-input:focus {
-          border-bottom: 2px solid #ccc;
-          outline: 0;
-        }
       `}</style>
       <div style={{ display: "flex" }}>
         <div style={{ flex: 1 }}>
           <form>
-            <input
-              type="text"
-              className="name-input"
-              value={userName}
-              // TODO: Is this the right way to do this?
-              onChange={(e) => setState({ ...state, name: e.target.value })}
-              placeholder="Name"
-            />
+            <Autosuggest userName={userName} />
             <TitleSelector
               milestoneByTrack={milestoneByTrack}
               currentTitle={state.title}

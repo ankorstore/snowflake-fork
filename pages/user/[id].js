@@ -3,7 +3,6 @@ import Link from "next/link";
 import RouteGuard from "../../guards/RouteGuard";
 import AppContext from "../../context/AppContext";
 import SnowflakeApp from "../../components/SnowflakeApp";
-import Autosuggest from "../../components/Autosuggest";
 
 const UserPage = () => {
   const { loading } = useContext(AppContext);
@@ -14,7 +13,6 @@ const UserPage = () => {
         "Loading..."
       ) : (
         <div className="flex justify-start pt-2 gap-2">
-          <Autosuggest />
           <SnowflakeApp />
         </div>
       )}

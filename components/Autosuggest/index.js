@@ -7,31 +7,19 @@ import Profile from "../../components/Profile";
 import ReactAutosuggest from "react-autosuggest";
 import theme from "./autosuggest.module.css";
 
-const Autosuggest = () => {
+const Autosuggest = ({ userName = "" }) => {
   const { data, loading } = useContext(AppContext);
   const [users, setUsers] = useState(Object.keys(data.users));
-  const [inputValue, setInputValue] = useState("");
+  const [inputValue, setInputValue] = useState(userName);
 
   return (
-    <div className="flex relative min-w-[260px] px-2">
-      <label className="w-full h-8 inline-flex rounded-default border px-2">
-        <span className="h-full flex items-center px-1">
-          <svg
-            width="13"
-            height="13"
-            viewBox="0 0 13 13"
-            xmlns="http://www.w3.org/2000/svg"
-            fill="#000"
-          >
-            <path d="M8.87 8.16l3.25 3.25-.7.71-3.26-3.25a5 5 0 1 1 .7-.7zM5 9a4 4 0 1 0 0-8 4 4 0 0 0 0 8z"></path>
-          </svg>
-        </span>
+    <div className="flex relative mb-4">
+      <label className="w-full inline-flex">
         <ReactAutosuggest
           theme={theme}
           renderSuggestion={(userName) => (
             <Link href={`/user/${userName}`}>{userName}</Link>
           )}
-          alwaysRenderSuggestions={true}
           inputProps={{
             placeholder: "Type a user name",
             type: "search",
@@ -53,10 +41,6 @@ const Autosuggest = () => {
             setUsers(usersToDisplay);
           }}
           getSuggestionValue={(value) => value}
-          onSuggestionSelected={() => {
-            console.log("onSuggestionSelected");
-          }}
-          alwaysRenderSuggestions={true}
         />
       </label>
     </div>
