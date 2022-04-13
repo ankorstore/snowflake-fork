@@ -1,14 +1,11 @@
 import { useContext, useState } from "react";
 import Link from "next/link";
-import RouteGuard from "../../guards/RouteGuard";
 import AppContext from "../../context/AppContext";
-import SnowflakeApp from "../../components/SnowflakeApp";
-import Profile from "../../components/Profile";
 import ReactAutosuggest from "react-autosuggest";
 import theme from "./autosuggest.module.css";
 
 const Autosuggest = ({ userName = "" }) => {
-  const { data, loading } = useContext(AppContext);
+  const { data } = useContext(AppContext);
   const [users, setUsers] = useState(Object.keys(data.users));
   const [inputValue, setInputValue] = useState(userName);
 

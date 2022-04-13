@@ -59,7 +59,7 @@ const TrackSelector = (props: Props) => {
               style={{
                 border:
                   "4px solid " +
-                  (trackId == props.focusedTrackId
+                  (trackId === props.focusedTrackId
                     ? "#000"
                     : categoryColorScale(tracks[trackId].category)),
                 background: categoryColorScale(tracks[trackId].category),

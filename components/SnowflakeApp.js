@@ -3,7 +3,6 @@ import TrackSelector from "../components/TrackSelector";
 import NightingaleChart from "../components/NightingaleChart";
 import KeyboardListener from "../components/KeyboardListener";
 import Track from "../components/Track";
-import Logo from "../components/Logo";
 import LevelThermometer from "../components/LevelThermometer";
 import { eligibleTitles } from "../constants";
 import PointSummaries from "../components/PointSummaries";
@@ -12,7 +11,6 @@ import React, { useState, useContext } from "react";
 import TitleSelector from "../components/TitleSelector";
 import type { User } from "../pages/user/[id].js";
 import { useRouter } from "next/router";
-import Link from "next/link";
 import AppContext from "../context/AppContext";
 import Autosuggest from "../components/Autosuggest";
 type SnowflakeAppState = {
@@ -88,7 +86,7 @@ const SnowflakeApp = () => {
 
   const setTitle = (title: string) => {
     let titles = eligibleTitles(milestoneByTrack, trackIds);
-    title = titles.indexOf(title) == -1 ? titles[0] : title;
+    title = titles.indexOf(title) === -1 ? titles[0] : title;
     setState({ ...state, title });
   };
 

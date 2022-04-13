@@ -64,7 +64,7 @@ const NightingaleChart = (props: Props) => {
       <svg>
         <g transform={`translate(${width / 2},${width / 2}) rotate(-33.75)`}>
           {trackIds.map((trackId, i) => {
-            const isCurrentTrack = trackId == props.focusedTrackId;
+            const isCurrentTrack = trackId === props.focusedTrackId;
             return (
               <g
                 key={trackId}
@@ -72,10 +72,10 @@ const NightingaleChart = (props: Props) => {
               >
                 {arcMilestones.map((milestone) => {
                   const isCurrentMilestone =
-                    isCurrentTrack && milestone == currentMilestoneId;
+                    isCurrentTrack && milestone === currentMilestoneId;
                   const isMet =
                     props.milestoneByTrack[trackId] >= milestone ||
-                    milestone == 0;
+                    milestone === 0;
                   return (
                     <path
                       key={milestone}

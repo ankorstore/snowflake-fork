@@ -1,5 +1,4 @@
-import { useContext, useState } from "react";
-import Link from "next/link";
+import { useContext } from "react";
 import RouteGuard from "../../guards/RouteGuard";
 import AppContext from "../../context/AppContext";
 import SnowflakeApp from "../../components/SnowflakeApp";

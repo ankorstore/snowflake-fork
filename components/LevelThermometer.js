@@ -129,7 +129,7 @@ const LevelThermometer = (props: Props) => {
             const width =
               pointScale(cumulativePoints + categoryPoint.points) - x;
             cumulativePoints += categoryPoint.points;
-            return i != lastCategoryIndex ? (
+            return i !== lastCategoryIndex ? (
               <rect
                 key={categoryPoint.categoryId}
                 x={x}

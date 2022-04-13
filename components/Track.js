@@ -1,7 +1,7 @@
 // @flow
 import { milestones } from "../constants";
 import React, { useContext } from "react";
-import type { MilestoneMap, TrackId, Milestone } from "../constants";
+import type { MilestoneMap, TrackId } from "../constants";
 import AppContext from "../context/AppContext";
 
 type Props = {
