@@ -1,7 +1,7 @@
 // @flow
 
 import * as d3 from 'd3'
-import { pointsToLevels, categoryPointsFromMilestoneMap, categoryColorScale, categoryIds } from '../constants'
+import { pointsToLevels, categoryPointsFromMilestoneMap, categoryColorScale } from '../constants'
 import React from 'react'
 import type { MilestoneMap } from '../constants'
 
@@ -94,7 +94,7 @@ class LevelThermometer extends React.Component<Props> {
               const x = this.pointScale(cumulativePoints)
               const width = this.pointScale(cumulativePoints + categoryPoint.points) - x
               cumulativePoints += categoryPoint.points
-              return (i != lastCategoryIndex ?
+              return (i !== lastCategoryIndex ?
                 <rect
                     key={categoryPoint.categoryId}
                     x={x}
